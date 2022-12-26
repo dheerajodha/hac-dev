@@ -39,9 +39,9 @@ export class Applications {
     cy.testA11y(`Select source form`);
   }
 
-  static createComponent(publicGitRepo: string, componentName: string) {
+  static createComponent(publicGitRepo: string, componentName: string, sendPR: boolean = false) {
     addComponentStep(publicGitRepo);
-    reviewComponentsStep(componentName);
+    reviewComponentsStep(componentName, publicGitRepo, sendPR);
   }
 
 
@@ -91,7 +91,7 @@ function addComponentStep(publicGitRepo: string) {
 }
 
 
-function reviewComponentsStep(componentName: string) {
+function reviewComponentsStep(componentName: string, publicGitRepo: string, sendPR: boolean) {
   const componentPage = new ComponentPage();
 
   // Edit component name
@@ -102,8 +102,14 @@ function reviewComponentsStep(componentName: string) {
   componentPage.editComponentName(componentName);
   cy.contains('div', componentName).should('be.visible');;
 
+  if (sendPR) {
+    componentPage.sendPullRequest();
+  }
+
   //Create Application
   componentPage.createApplication();
+
+  (sendPR)? componentPage.triggerBuilds(componentName, publicGitRepo): "";
 }
 
 

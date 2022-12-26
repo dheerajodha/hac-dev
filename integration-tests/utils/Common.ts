@@ -66,4 +66,17 @@ export class Common {
   static getOrigin(){
     return new URL(Cypress.env('HAC_BASE_URL')).origin;
   }
+
+  static renameGitRepo(publicGitRepo: string): string {
+    const token = Cypress.env('GH_TOKEN');
+    const owner = publicGitRepo.split("/")[3];
+    const repo = publicGitRepo.split("/")[4];
+    const newRepoName = this.generateAppName(repo);
+
+    cy.exec(`curl -o - -I ${publicGitRepo} | grep "location:" | cut -d':' -f2,3 | cut -d'/' -f5`).then((currentGitRepoName) => {
+      cy.exec(`curl -X PATCH -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${token}" -H "X-GitHub-Api-Version: 2022-11-28" https://api.github.com/repos/${owner}/${currentGitRepoName.stdout} -d '{"name": "${newRepoName}"}'`);
+    })
+
+    return newRepoName;
+  }
 }

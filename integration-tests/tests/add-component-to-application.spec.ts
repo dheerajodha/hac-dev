@@ -12,8 +12,8 @@ describe('Create Components using the UI', () => {
   const pipelineName = 'demo-pipeline';
   const publicRepos = [
     'https://github.com/dheerajodha/devfile-sample-code-with-quarkus',
-    'https://github.com/devfile-samples/devfile-sample-go-basic.git',
-    'https://github.com/nodeshift-starters/devfile-sample.git',
+    'https://github.com/dheerajodha/devfile-sample-go-basic',
+    'https://github.com/dheerajodha/devfile-sample',
   ];
   const componentNames = ['java-quarkus', 'go', 'go-component', 'nodejs'];
   const integrationTestNames = ['my-test-1', 'my-optional-test'];
@@ -46,7 +46,9 @@ describe('Create Components using the UI', () => {
     });
 
     it('Add a component to Application', () => {
-      Applications.createComponent(publicRepos[0], componentNames[0]);
+      componentNames[0] = Common.generateAppName(componentNames[0]);
+
+      Applications.createComponent(publicRepos[0], componentNames[0], true);
       Applications.createdComponentExists(componentNames[0], applicationName);
     });
   });
@@ -57,7 +59,9 @@ describe('Create Components using the UI', () => {
     });
 
     it('Add a component to Application', () => {
-      Applications.createComponent(publicRepos[1], componentNames[1]);
+      componentNames[1] = Common.generateAppName(componentNames[1]);
+
+      Applications.createComponent(publicRepos[1], componentNames[1], true);
       Applications.createdComponentExists(componentNames[1], applicationName);
     });
   });
@@ -68,7 +72,9 @@ describe('Create Components using the UI', () => {
     });
 
     it('Add a component to Application', () => {
-      Applications.createComponent(publicRepos[1], componentNames[2]);
+      componentNames[2] = Common.generateAppName(componentNames[2]);
+
+      Applications.createComponent(publicRepos[1], componentNames[2], true);
       Applications.createdComponentExists(componentNames[2], applicationName);
     });
   });
@@ -79,7 +85,9 @@ describe('Create Components using the UI', () => {
     });
 
     it('Add a component to Application', () => {
-      Applications.createComponent(publicRepos[2], componentNames[3]);
+      componentNames[3] = Common.generateAppName(componentNames[3]);
+
+      Applications.createComponent(publicRepos[2], componentNames[3], true);
       Applications.createdComponentExists(componentNames[3], applicationName);
     });
   });

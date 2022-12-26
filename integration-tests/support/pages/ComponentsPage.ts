@@ -1,6 +1,6 @@
 import { Common } from '../../utils/Common';
 import { CPUUnit, MemoryUnit } from '../constants/Units';
-import { ComponentsPagePO } from '../pageObjects/createApplication-po';
+import { applicationDetailPagePO, ComponentsPagePO } from '../pageObjects/createApplication-po';
 import { alertTitle } from '../pageObjects/global-po';
 import { AbstractWizardPage } from './AbstractWizardPage';
 
@@ -87,5 +87,33 @@ export class ComponentPage extends AbstractWizardPage {
 
   expandDetails(componentName: string) {
     cy.get(`[aria-label="${componentName}"]`).click();
+  }
+
+  sendPullRequest() {
+    cy.get(ComponentsPagePO.sendPRCheckbox).click();
+  }
+
+  triggerBuilds(componentName: string, publicGitRepo: string) {
+    const token = "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"
+    const owner = publicGitRepo.split("/")[3];
+    const currentGitRepoName = publicGitRepo.split("/")[4];
+    cy.log(token, " ", owner, " ", currentGitRepoName, " ");
+
+    cy.wait(20000);
+
+    cy.exec(`curl -s \
+      -H "Accept: application/vnd.github+json" \
+      -H "Authorization: Bearer ${token}"\
+      -H "X-GitHub-Api-Version: 2022-11-28" \
+      https://api.github.com/search/issues?q=${componentName} |
+      grep '^ *"number":' | head -1 | sed -e 's/,//g' | cut -d':' -f 2`).then((pullNumber) => {
+
+        cy.log(currentGitRepoName, " :: ", pullNumber.stdout);
+            cy.exec(`curl \
+              -X POST -H "Authorization: Bearer ${token}" \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/${owner}/${currentGitRepoName}/issues/${pullNumber.stdout}/comments -d '{"body":"/retest"}'`);
+    });
   }
 }

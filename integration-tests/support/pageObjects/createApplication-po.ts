@@ -47,6 +47,7 @@ export const ComponentsPagePO = {
   loading: '[data-test="loading-indicator"]',
   saveButton: '[data-test="submit-button"]',
   editNameInput: '[data-test="editable-label-input"]',
+  sendPRCheckbox: '[data-test="send-pull-request"]',
 };
 
 export const applicationDetailPagePO = {

@@ -1,4 +1,5 @@
 import { actions } from '../support/pageObjects/global-po';
+import { AddComponentPage } from '../support/pages/AddComponentPage';
 import { IntegrationTestsTabPage } from '../support/pages/tabs/IntegrationTestsTabPage';
 import { addIntegrationTestStep, Applications } from '../utils/Applications';
 import { Common } from '../utils/Common';
@@ -8,6 +9,7 @@ describe('Create Components using the UI', () => {
   const LOCAL_STORAGE_KEY_APPLICATION_MODAL = 'showApplicationModal';
   const applicationName = Common.generateAppName();
   const integrationTestsTabPage = new IntegrationTestsTabPage();
+  const addComponent = new AddComponentPage();
   const containerImage = 'https://quay.io/kpavic/test-bundle:pipeline';
   const pipelineName = 'demo-pipeline';
   const publicRepos = [
@@ -15,7 +17,7 @@ describe('Create Components using the UI', () => {
     'https://github.com/dheerajodha/devfile-sample-go-basic',
     'https://github.com/dheerajodha/devfile-sample',
   ];
-  const componentNames = ['java-quarkus', 'go', 'go-component', 'nodejs'];
+  const componentNames = ['java-quarkus', 'go', 'nodejs'];
   const integrationTestNames = ['my-test-1', 'my-optional-test'];
   const integrationTestMetadata = [
     integrationTestNames[1],
@@ -58,11 +60,10 @@ describe('Create Components using the UI', () => {
       Applications.goToOverviewTab().addComponent();
     });
 
-    it('Add a component to Application', () => {
-      componentNames[1] = Common.generateAppName(componentNames[1]);
-
-      Applications.createComponent(publicRepos[1], componentNames[1], true);
-      Applications.createdComponentExists(componentNames[1], applicationName);
+    it('Verify we are on "Add Component" wizard, and then hit Cancel', () => {
+      cy.url().should('include', `/import?application=${applicationName}`);
+      addComponent.clickCancel();
+      cy.url().should('include', `${applicationName}?activeTab=overview`)
     });
   });
 
@@ -72,10 +73,10 @@ describe('Create Components using the UI', () => {
     });
 
     it('Add a component to Application', () => {
-      componentNames[2] = Common.generateAppName(componentNames[2]);
+      componentNames[1] = Common.generateAppName(componentNames[1]);
 
-      Applications.createComponent(publicRepos[1], componentNames[2], true);
-      Applications.createdComponentExists(componentNames[2], applicationName);
+      Applications.createComponent(publicRepos[1], componentNames[1], true);
+      Applications.createdComponentExists(componentNames[1], applicationName);
     });
   });
 
@@ -85,10 +86,10 @@ describe('Create Components using the UI', () => {
     });
 
     it('Add a component to Application', () => {
-      componentNames[3] = Common.generateAppName(componentNames[3]);
+      componentNames[2] = Common.generateAppName(componentNames[2]);
 
-      Applications.createComponent(publicRepos[2], componentNames[3], true);
-      Applications.createdComponentExists(componentNames[3], applicationName);
+      Applications.createComponent(publicRepos[2], componentNames[2], true);
+      Applications.createdComponentExists(componentNames[2], applicationName);
     });
   });
 

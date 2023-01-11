@@ -1,6 +1,7 @@
 import { actions } from '../support/pageObjects/global-po';
 import { AddComponentPage } from '../support/pages/AddComponentPage';
 import { IntegrationTestsTabPage } from '../support/pages/tabs/IntegrationTestsTabPage';
+import { PipelinerunsTabPage } from '../support/pages/tabs/PipelinerunsTabPage';
 import { addIntegrationTestStep, Applications } from '../utils/Applications';
 import { Common } from '../utils/Common';
 
@@ -8,6 +9,7 @@ describe('Create Components using the UI', () => {
   const LOCAL_STORAGE_KEY_GS_MODAL = 'getting-started-modal';
   const LOCAL_STORAGE_KEY_APPLICATION_MODAL = 'showApplicationModal';
   const applicationName = Common.generateAppName();
+  const pipelinerunsTab = new PipelinerunsTabPage();
   const integrationTestsTabPage = new IntegrationTestsTabPage();
   const addComponent = new AddComponentPage();
   const containerImage = 'https://quay.io/kpavic/test-bundle:pipeline';
@@ -50,7 +52,7 @@ describe('Create Components using the UI', () => {
     it('Add a component to Application', () => {
       componentNames[0] = Common.generateAppName(componentNames[0]);
 
-      Applications.createComponent(publicRepos[0], componentNames[0], true);
+      Applications.createComponent(publicRepos[0], componentNames[0]);
       Applications.createdComponentExists(componentNames[0], applicationName);
     });
   });
@@ -75,7 +77,7 @@ describe('Create Components using the UI', () => {
     it('Add a component to Application', () => {
       componentNames[1] = Common.generateAppName(componentNames[1]);
 
-      Applications.createComponent(publicRepos[1], componentNames[1], true);
+      Applications.createComponent(publicRepos[1], componentNames[1]);
       Applications.createdComponentExists(componentNames[1], applicationName);
     });
   });
@@ -85,12 +87,33 @@ describe('Create Components using the UI', () => {
       Applications.clickActionsDropdown('Add component');
     });
 
-    it('Add a component to Application', () => {
-      componentNames[2] = Common.generateAppName(componentNames[2]);
-
-      Applications.createComponent(publicRepos[2], componentNames[2], true);
-      Applications.createdComponentExists(componentNames[2], applicationName);
+    it('Verify we are on "Add Component" wizard, and then hit Cancel', () => {
+      cy.url().should('include', `/import?application=${applicationName}`);
+      addComponent.clickCancel();
+      cy.url().should('include', `${applicationName}?activeTab=components`)
     });
+  });
+
+  describe('Explore Pipeline runs Tab', () => {
+    it("Verify the PipelineRuns List view", () => {
+      Applications.goToPipelinerunsTab();
+
+      cy.get('tbody tr').each(($row) => {
+        cy.wrap($row).within(() => {
+            cy.get('td').eq(0).get('a').then((pipelinerunName) => {
+              Applications.createdPipelinerunsSucceeded(pipelinerunName.text().trim());
+              pipelinerunsTab.pipelineRunList.push(pipelinerunName.text().trim());
+            });
+        });
+      });
+    });
+  });
+
+  describe('Check Component Deployment', () => {
+    it("Verify the status code of deployment URL of each component is '200'", () => {
+      // TODO
+      
+    })
   });
 
   describe('Explore Integration Tests Tab', () => {

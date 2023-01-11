@@ -103,7 +103,10 @@ const PipelineRunDetailsTab: React.FC<PipelineRunDetailsTabProps> = ({ pipelineR
                 <DescriptionListGroup>
                   <DescriptionListTerm>Status</DescriptionListTerm>
                   <DescriptionListDescription>
-                    <StatusIconWithText status={pipelineRunFilterReducer(pipelineRun)} />
+                    <StatusIconWithText
+                      status={pipelineRunFilterReducer(pipelineRun)}
+                      dataTestAttribute={'pipelinerun-details status'}
+                    />
                   </DescriptionListDescription>
                 </DescriptionListGroup>
                 {Object.keys(pipelineRunFailed).length > 0 && (

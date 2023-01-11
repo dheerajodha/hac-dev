@@ -41,3 +41,7 @@ export const actions = {
 export const navigation = {
   sideNavigation: '[data-ouia-component-id="SideNavigation"]',
 };
+
+export const breadcrumb = {
+  breadcrumbLink: '[data-testid="breadcrumb-link-{0}"]'
+}

@@ -7,7 +7,20 @@ export const overviewTabPO = {
 export const componentsTabPO = {
   clickTab: '[data-test="details__tabItem components"]',
   addComponent: '[data-test="add-component-button"]',
+  componentListItem: '[data-test="{0}-component-list-item"]',
 };
+
+export const pipelinerunsTabPO = {
+  clickTab: '[data-test="details__tabItem pipelineruns"]',
+
+  clickDetailsTab: '[data-test="details__tabItem detail"]',
+  statusPO: '[data-test="pipelinerun-details status"]',
+
+  clickTaskRunsTab: '[data-test="details__tabItem yaml"]',
+
+  clickLogsTab: '[data-test="details__tabItem logs"]',
+  downloadAllTaskLogsButton: 'Download all task logs',
+}
 
 export const integrationTestsTabPO = {
   clickTab: '[data-test="details__tabItem integrationtests"]',

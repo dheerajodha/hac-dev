@@ -1,11 +1,12 @@
 import { NavItem, pageTitles } from '../support/constants/PageTitle';
-import { actions } from '../support/pageObjects/global-po';
+import { actions, breadcrumb } from '../support/pageObjects/global-po';
 import { CreateApplicationPage } from '../support/pages/CreateApplicationPage';
 import { Common } from './Common';
 import { applicationDetailPagePO } from '../support/pageObjects/createApplication-po';
 import {
   actionsDropdown,
   componentsTabPO,
+  pipelinerunsTabPO,
   integrationTestsTabPO,
   overviewTabPO
 } from '../support/pageObjects/pages-po';
@@ -15,6 +16,7 @@ import { AddComponentPage } from '../support/pages/AddComponentPage';
 import { ComponentPage } from '../support/pages/ComponentsPage';
 import { CreateBuildPage } from '../support/pages/CreateBuildPage';
 import { AddIntegrationTestPage } from '../support/pages/AddIntegrationTestPage';
+import { DetailsTab, PipelinerunsTabPage, TaskRunsTab } from '../support/pages/tabs/PipelinerunsTabPage';
 
 export class Applications {
   static deleteApplication(applicationName: string) {
@@ -45,12 +47,28 @@ export class Applications {
   }
 
 
-  static createdComponentExists(componentName: string, applicationName: string) {
+  static createdComponentExists(componentName: string, applicationName: string, strictChecking: boolean = false) {
     this.goToComponentsTab();
 
     Common.verifyPageTitle(applicationName);
     Common.waitForLoad();
     this.getComponentListItem(componentName).should('exist');
+
+    if (strictChecking) {
+      cy.get(componentsTabPO.componentListItem.replace('{0}', componentName)).contains(/.*Build Succeeded.*/, { timeout: 120000 });
+    }
+  }
+
+  static createdPipelinerunsSucceeded(pipelinerunName: string) {
+    PipelinerunsTabPage.doesPipelinerunExistsInListView(pipelinerunName);
+    PipelinerunsTabPage.clickOnPipelinerunFromListView(pipelinerunName);
+  
+    // Assert the 'Status' with string "Succeeded"
+    DetailsTab.checkStatusSucceeded();
+    TaskRunsTab.goToTaskRunsTab()
+    TaskRunsTab.assertTaskNames();
+  
+    this.clickBreadcrumbLinkAtPosition('2');
   }
 
   static getComponentListItem(application: string) {
@@ -62,6 +80,10 @@ export class Applications {
     cy.contains(dropdownItem).click();
   }
 
+  static clickBreadcrumbLinkAtPosition(positionIndex: string) {
+    cy.get(breadcrumb.breadcrumbLink.replace('{0}', positionIndex)).click();
+  }
+
   static goToOverviewTab() {
     cy.get(overviewTabPO.clickTab).click();
     return new OverviewTabPage();
@@ -70,6 +92,10 @@ export class Applications {
   static goToComponentsTab() {
     cy.get(componentsTabPO.clickTab).click();
     return new ComponentsTabPage();
+  }
+
+  static goToPipelinerunsTab() {
+    cy.get(pipelinerunsTabPO.clickTab).click();
   }
 
   static goToIntegrationTestsTab() {

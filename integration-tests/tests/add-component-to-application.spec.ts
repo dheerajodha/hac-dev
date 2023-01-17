@@ -19,12 +19,10 @@ describe('Create Components using the UI', () => {
   const pipelineName = 'demo-pipeline';
   const publicRepos = [
     'https://github.com/dheerajodha/devfile-sample-code-with-quarkus',
-    //'https://github.com/dheerajodha/devfile-sample-go-basic',
   ];
-  const componentNames: string[] = ['java-quarkus']; //'go'];
+  const componentNames: string[] = ['java-quarkus'];
   const deploymentBody = new Map<string, string>();
   const quarkusDeplomentBody = 'Congratulations, you have created a new Quarkus cloud application';
-  //const goDeploymentBody = 'Hello, !';
   const integrationTestNames = ['my-test-1', 'my-optional-test'];
   const integrationTestMetadata = [
     integrationTestNames[1],
@@ -45,7 +43,6 @@ describe('Create Components using the UI', () => {
   });
 
   after(function () {
-    //Delete the application
     Applications.deleteApplication(applicationName);
   });
 
@@ -63,7 +60,7 @@ describe('Create Components using the UI', () => {
     });
   });
 
-  describe('Add a new component using the "Overview" tab', () => {
+  describe('Try to add a new component using the "Overview" tab', () => {
     it("Use 'Components' tabs to start adding a new component", () => {
       Applications.goToOverviewTab().addComponent();
     });
@@ -71,30 +68,23 @@ describe('Create Components using the UI', () => {
     it('Verify we are on "Add Component" wizard, and then hit Cancel', () => {
       cy.url().should('include', `/import?application=${applicationName}`);
       addComponent.clickCancel();
-      cy.url().should('include', `${applicationName}?activeTab=overview`)
+      cy.url().should('include', `${applicationName}?activeTab=overview`);
     });
   });
 
-  describe('Add a new component using the "Components" tab', () => {
+  describe('Try to add a new component using the "Components" tab', () => {
     it("Use HACBS 'Components' tabs to start adding a new component", () => {
       Applications.goToComponentsTab().clickAddComponent();
     });
 
-    //it('Add a component to Application', () => {
     it('Verify we are on "Add Component" wizard, and then hit Cancel', () => {
       cy.url().should('include', `/import?application=${applicationName}`);
       addComponent.clickCancel();
-      cy.url().should('include', `${applicationName}?activeTab=components`)
-
-      // componentNames[1] = Common.generateAppName(componentNames[1]);
-      // deploymentBody.set(componentNames[1], goDeploymentBody);
-
-      // Applications.createComponent(publicRepos[1], componentNames[1]);
-      // Applications.createdComponentExists(componentNames[1], applicationName);
+      cy.url().should('include', `${applicationName}?activeTab=components`);
     });
   });
 
-  describe('Add a new component using the "Actions" dropdown', () => {
+  describe('Try to add a new component using the "Actions" dropdown', () => {
     it("Click 'Actions' dropdown to add a component", () => {
       Applications.clickActionsDropdown('Add component');
     });
@@ -124,7 +114,7 @@ describe('Create Components using the UI', () => {
   });
 
   describe('Check Component Deployment', () => {
-    it("Verify the status code of deployment URL of each component is '200'", () => {
+    it("Verify the status code and response body of the deployment URL of each component", () => {
       Applications.goToComponentsTab();
       
       for (let componentName of componentNames) {

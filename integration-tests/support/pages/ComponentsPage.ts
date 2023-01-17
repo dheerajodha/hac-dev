@@ -96,7 +96,7 @@ export class ComponentPage extends AbstractWizardPage {
   }
 
   triggerBuilds(componentName: string, publicGitRepo: string) {
-    const token = "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"
+    const token = Cypress.env('GH_TOKEN');
     const owner = publicGitRepo.split("/")[3];
     const currentGitRepoName = publicGitRepo.split("/")[4];
     cy.log(token, " ", owner, " ", currentGitRepoName, " ");

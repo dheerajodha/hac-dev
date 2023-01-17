@@ -43,5 +43,5 @@ export const navigation = {
 };
 
 export const breadcrumb = {
-  breadcrumbLink: '[data-testid="breadcrumb-link-{0}"]'
+  breadcrumbLink: '[data-test-id="breadcrumb-link-{0}"]'
 }

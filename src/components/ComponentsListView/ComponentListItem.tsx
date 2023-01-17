@@ -162,7 +162,11 @@ export const ComponentListItem: React.FC<ComponentListViewItemProps> = ({
                 <DescriptionListTermHelpTextButton>Route</DescriptionListTermHelpTextButton>
               </DescriptionListTermHelpText>
               <DescriptionListDescription>
-                <ExternalLink href={componentRouteWebURL} text={componentRouteWebURL} />
+                <ExternalLink
+                  href={componentRouteWebURL}
+                  text={componentRouteWebURL}
+                  dataTestID={`${name}-route`}
+                />
               </DescriptionListDescription>
             </DescriptionListGroup>
           )}

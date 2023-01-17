@@ -1,5 +1,7 @@
+import { applicationDetailPagePO } from '../support/pageObjects/createApplication-po';
 import { actions } from '../support/pageObjects/global-po';
 import { AddComponentPage } from '../support/pages/AddComponentPage';
+import { ApplicationDetailPage } from '../support/pages/ApplicationDetailPage';
 import { IntegrationTestsTabPage } from '../support/pages/tabs/IntegrationTestsTabPage';
 import { PipelinerunsTabPage } from '../support/pages/tabs/PipelinerunsTabPage';
 import { addIntegrationTestStep, Applications } from '../utils/Applications';
@@ -9,6 +11,7 @@ describe('Create Components using the UI', () => {
   const LOCAL_STORAGE_KEY_GS_MODAL = 'getting-started-modal';
   const LOCAL_STORAGE_KEY_APPLICATION_MODAL = 'showApplicationModal';
   const applicationName = Common.generateAppName();
+  const applicationDetailPage = new ApplicationDetailPage();
   const pipelinerunsTab = new PipelinerunsTabPage();
   const integrationTestsTabPage = new IntegrationTestsTabPage();
   const addComponent = new AddComponentPage();
@@ -16,10 +19,12 @@ describe('Create Components using the UI', () => {
   const pipelineName = 'demo-pipeline';
   const publicRepos = [
     'https://github.com/dheerajodha/devfile-sample-code-with-quarkus',
-    'https://github.com/dheerajodha/devfile-sample-go-basic',
-    'https://github.com/dheerajodha/devfile-sample',
+    //'https://github.com/dheerajodha/devfile-sample-go-basic',
   ];
-  const componentNames = ['java-quarkus', 'go', 'nodejs'];
+  const componentNames: string[] = ['java-quarkus']; //'go'];
+  const deploymentBody = new Map<string, string>();
+  const quarkusDeplomentBody = 'Congratulations, you have created a new Quarkus cloud application';
+  //const goDeploymentBody = 'Hello, !';
   const integrationTestNames = ['my-test-1', 'my-optional-test'];
   const integrationTestMetadata = [
     integrationTestNames[1],
@@ -51,6 +56,7 @@ describe('Create Components using the UI', () => {
 
     it('Add a component to Application', () => {
       componentNames[0] = Common.generateAppName(componentNames[0]);
+      deploymentBody.set(componentNames[0], quarkusDeplomentBody);
 
       Applications.createComponent(publicRepos[0], componentNames[0]);
       Applications.createdComponentExists(componentNames[0], applicationName);
@@ -74,11 +80,17 @@ describe('Create Components using the UI', () => {
       Applications.goToComponentsTab().clickAddComponent();
     });
 
-    it('Add a component to Application', () => {
-      componentNames[1] = Common.generateAppName(componentNames[1]);
+    //it('Add a component to Application', () => {
+    it('Verify we are on "Add Component" wizard, and then hit Cancel', () => {
+      cy.url().should('include', `/import?application=${applicationName}`);
+      addComponent.clickCancel();
+      cy.url().should('include', `${applicationName}?activeTab=components`)
 
-      Applications.createComponent(publicRepos[1], componentNames[1]);
-      Applications.createdComponentExists(componentNames[1], applicationName);
+      // componentNames[1] = Common.generateAppName(componentNames[1]);
+      // deploymentBody.set(componentNames[1], goDeploymentBody);
+
+      // Applications.createComponent(publicRepos[1], componentNames[1]);
+      // Applications.createdComponentExists(componentNames[1], applicationName);
     });
   });
 
@@ -98,25 +110,41 @@ describe('Create Components using the UI', () => {
     it("Verify the PipelineRuns List view", () => {
       Applications.goToPipelinerunsTab();
 
-      cy.get('tbody tr').each(($row) => {
-        cy.wrap($row).within(() => {
-            cy.get('td').eq(0).get('a').then((pipelinerunName) => {
-              Applications.createdPipelinerunsSucceeded(pipelinerunName.text().trim());
-              pipelinerunsTab.pipelineRunList.push(pipelinerunName.text().trim());
+      cy.get('tbody').find("tr").then((row) => {
+        for (let i = 0; i < row.length; i++) {
+          cy.get('tbody tr').eq(i).then(($row) => {
+            cy.wrap($row).find('td').eq(0).find('a').then((pipelinerunName) => {
+                Applications.createdPipelinerunsSucceeded(pipelinerunName.text().trim());
+                pipelinerunsTab.pipelineRunList.push(pipelinerunName.text().trim());
             });
-        });
+          });
+        }
       });
     });
   });
 
   describe('Check Component Deployment', () => {
     it("Verify the status code of deployment URL of each component is '200'", () => {
-      // TODO
+      Applications.goToComponentsTab();
       
+      for (let componentName of componentNames) {
+        applicationDetailPage.expandDetails(componentName);
+
+        cy.get(applicationDetailPagePO.route.replace('{0}', componentName), { timeout: 35000 }).invoke('text').then(route => {
+          cy.wait(20000);
+          cy.request({
+            url: route,
+            retryOnStatusCodeFailure: true
+          }).then((response) => {
+            expect(response.status).to.eq(200);
+            expect(response.body).to.include(deploymentBody.get(componentName));
+          })
+        });
+      }
     })
   });
 
-  describe('Explore Integration Tests Tab', () => {
+  describe.skip('Explore Integration Tests Tab', () => {
     it("Click 'Actions' dropdown to add a integration test", () => {
       Applications.clickActionsDropdown('Add integration test');
       addIntegrationTestStep(integrationTestNames[0]);

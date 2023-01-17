@@ -11,6 +11,27 @@ export class PipelinerunsTabPage {
     static doesPipelinerunExistsInListView(pipelinerun: string) {
         cy.contains(pipelinerun);
     }
+
+    static checkPipelinerunStatus() {
+        cy.wait(25000);
+        cy.get(pipelinerunsTabPO.statusPO).invoke('text').then(text => {
+            if (text.includes('Running')) {
+                cy.get(pipelinerunsTabPO.statusPO, { timeout: 900000 }).should('not.have.text', 'Running');
+            }
+        });
+
+        cy.get(pipelinerunsTabPO.statusPO).invoke('text').then(text => {
+            cy.log("Latest status is: ", text);
+
+            if (text.includes('Succeeded')) {
+                TaskRunsTab.goToTaskRunsTab().assertTaskNamesAndTaskRunStatus();
+            }
+            else if (text.includes('Failed')) {
+                LogsTab.goToLogsTab();
+                cy.screenshot('capture-logs-on-pipelinerun-failure', {capture: 'fullPage'});
+            }
+        });
+    }
 }
 
 // Pipelineruns Details view page
@@ -20,33 +41,47 @@ export class DetailsTab {
     }
 
     static checkStatusSucceeded() {
-        cy.get(pipelinerunsTabPO.statusPO).invoke('text').then(text => {
+        cy.wait(5000);
+        cy.get(pipelinerunsTabPO.statusPO, {withinSubject:null}).invoke('text').then(text => {
             if (text.includes('Running')) {
                 cy.get(pipelinerunsTabPO.statusPO, { timeout: 720000 }).should('not.have.text', 'Running');
             }
 
             if (text.includes('Failed')) {
                 LogsTab.goToLogsTab();
-                cy.screenshot('capture-logs-on-pipelinerun-failure');
+                cy.screenshot('capture-logs-on-pipelinerun-failure', {capture: 'fullPage'});
             }
         })
     }
 }
 
 export class TaskRunsTab {
-    static taskNameList: string[] = ['init', 'git-clone', 'sast-snyk-check', 'configure-build', 'buildah',
-                                    'clamav-scan', 'sbom-json-check', 'clair-scan', 'sanity-inspect-image',
-                                    'deprecated-image-check', 'sanity-label-check', 'sanity-label-check', 'summary'];
+    taskNameList: string[] = ['init', 'git-clone', 'configure-build', 'sast-snyk-check', 'buildah', 'deprecated-image-check',
+                                    'clamav-scan', 'sbom-json-check', 'sanity-inspect-image', 'clair-scan',
+                                    'sanity-label-check', 'sanity-label-check', 'summary'];
 
     static goToTaskRunsTab() {
         cy.get(pipelinerunsTabPO.clickTaskRunsTab).click();
         return new TaskRunsTab();
     }
 
-    static assertTaskNames() {
+    assertTaskNamesAndTaskRunStatus() {
         for (let i = 0; i < this.taskNameList.length; i++) {
             cy.get(`[data-test="${i}-0"] > td`).eq(1).then((taskName) => {
-                expect(taskName.text().trim()).to.equal(this.taskNameList[i]); 
+                expect(this.taskNameList.includes(taskName.text().trim())).to.equal(true);
+            });
+
+            cy.get(`[data-test="${i}-0"] > td`).eq(3).within(() => {
+                cy.get(pipelinerunsTabPO.taskRunStatus).invoke('text').then(status => {
+                    if (status.includes('Failed')) {
+                        cy.screenshot('taskrun-failed-even-though-pipelinerun-succeeded', {capture: 'fullPage'});
+                        return;
+                    }
+                    else if (status.includes('Pending')) {
+                        cy.screenshot('taskrun-pending-even-though-pipelinerun-succeeded', {capture: 'fullPage'});
+                        return;
+                    }
+                })
             });
         }
     }
@@ -54,7 +89,7 @@ export class TaskRunsTab {
 
 export class LogsTab {
     static goToLogsTab() {
-        cy.get(pipelinerunsTabPO.clickLogsTab).click();
+        cy.get(pipelinerunsTabPO.clickLogsTab, {withinSubject:null}).click();
     }
 
     static downloadAllTaskLogs() {

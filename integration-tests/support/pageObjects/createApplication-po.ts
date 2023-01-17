@@ -58,6 +58,7 @@ export const applicationDetailPagePO = {
   detailsArrow: '[aria-label="Details"]',
   cpuRamLabel: 'CPU/Mem Requests',
   replicaLabel: 'Instances',
+  route: '[data-test-id="{0}-route"]',
 };
 
 export const componentsListPagePO = {

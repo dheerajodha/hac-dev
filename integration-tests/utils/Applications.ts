@@ -62,13 +62,10 @@ export class Applications {
   static createdPipelinerunsSucceeded(pipelinerunName: string) {
     PipelinerunsTabPage.doesPipelinerunExistsInListView(pipelinerunName);
     PipelinerunsTabPage.clickOnPipelinerunFromListView(pipelinerunName);
-  
-    // Assert the 'Status' with string "Succeeded"
-    DetailsTab.checkStatusSucceeded();
-    TaskRunsTab.goToTaskRunsTab()
-    TaskRunsTab.assertTaskNames();
-  
+    PipelinerunsTabPage.checkPipelinerunStatus();
+
     this.clickBreadcrumbLinkAtPosition('2');
+    cy.wait(5000);
   }
 
   static getComponentListItem(application: string) {

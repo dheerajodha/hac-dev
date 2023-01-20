@@ -6,6 +6,7 @@ export const addComponentPagePO = {
   gitReference: '[data-test="git-reference"]',
   contextDir: '[data-test="context-dir"]',
   next: 'button[type=submit]',
+  cancel: 'button[type=reset]',
   toggleButton: '[data-test="{0}-toggle-button"]',
   username: '[data-testid="auth-username"]',
   token: '[data-testid="auth-token"]',

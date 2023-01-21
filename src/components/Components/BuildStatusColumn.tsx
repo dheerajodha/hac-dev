@@ -34,7 +34,7 @@ export const getURLForComponentPRs = (components: ComponentKind[]): string => {
     }
     return acc;
   }, '');
-  return `https://github.com/pulls?q=is:pr+author:app/${PR_BOT_NAME}${repos}`;
+  return `https://github.com/pulls?q=is:pr+is:open+author:app/${PR_BOT_NAME}${repos}`;
 };
 
 const BuildStatusColumn: React.FC<BuildStatusComponentProps> = ({ component, allComponents }) => {
@@ -52,7 +52,7 @@ const BuildStatusColumn: React.FC<BuildStatusComponentProps> = ({ component, all
   });
 
   const merged = pipelineRunsLoaded && pipelineBuildRuns.length;
-  const hasPAC = hasPACAnnotation(component);
+  const hasPAC = pipelineRunsLoaded && hasPACAnnotation(component);
   const openPRsURL = getURLForComponentPRs(allComponents);
 
   return merged || !hasPAC ? (

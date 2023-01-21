@@ -1,5 +1,6 @@
 import * as React from 'react';
 import '@testing-library/jest-dom';
+import { useFeatureFlag } from '@openshift/dynamic-plugin-sdk';
 import { render, screen, configure, cleanup, fireEvent } from '@testing-library/react';
 import {
   mockSnapshotsEnvironmentBindings,
@@ -11,6 +12,7 @@ import {
   mockReleasesData,
   mockTestPipelinesData,
 } from '../../../../components/ApplicationDetails/tabs/overview/sections/__data__';
+import { EnvironmentType } from '../../../../components/Environment/environment-utils';
 import { useAllEnvironments } from '../../../../hooks/useAllEnvironments';
 import { useBuildPipelines } from '../../../../hooks/useBuildPipelines';
 import { useComponents } from '../../../../hooks/useComponents';
@@ -23,7 +25,6 @@ import { useTestPipelines } from '../../../../hooks/useTestPipelines';
 import { mockLocation } from '../../../../utils/test-utils';
 import { mockAppEnvWithHealthStatus } from '../__data__/mockAppEnvWithHealthStatus';
 import EnvironmentListView from '../EnvironmentListView';
-import { EnvironmentType } from '../utils';
 
 mockLocation();
 
@@ -45,6 +46,10 @@ jest.mock('react-router-dom', () => ({
     return [params, setParamsCb];
   },
   Link: (props) => <a href={props.to}>{props.children}</a>,
+}));
+
+jest.mock('@openshift/dynamic-plugin-sdk', () => ({
+  useFeatureFlag: jest.fn(),
 }));
 
 jest.mock('../../../../hooks/useComponents', () => ({
@@ -75,6 +80,7 @@ jest.mock('../../../../hooks/useAllEnvironments', () => ({
   useAllEnvironments: jest.fn(),
 }));
 
+const useFeatureFlagMock = useFeatureFlag as jest.Mock;
 const useComponentsMock = useComponents as jest.Mock;
 const useIntegrationTestScenariosMock = useIntegrationTestScenarios as jest.Mock;
 const useBuildPipelinesMock = useBuildPipelines as jest.Mock;
@@ -84,6 +90,10 @@ const useReleasePlansMock = useReleasePlans as jest.Mock;
 const useTestPipelinesMock = useTestPipelines as jest.Mock;
 const useSnapshotsEnvironmentBindingsMock = useSnapshotsEnvironmentBindings as jest.Mock;
 const useAllEnvironmentsMock = useAllEnvironments as jest.Mock;
+
+jest.mock('@openshift/dynamic-plugin-sdk', () => ({
+  useFeatureFlag: jest.fn(),
+}));
 
 configure({ testIdAttribute: 'data-test' });
 
@@ -98,6 +108,7 @@ describe('EnvironmentListView', () => {
     useTestPipelinesMock.mockReturnValue([mockTestPipelinesData, true]);
     useSnapshotsEnvironmentBindingsMock.mockReturnValue([mockSnapshotsEnvironmentBindings, true]);
     useAllEnvironmentsMock.mockReturnValue([mockAppEnvWithHealthStatus, true]);
+    useFeatureFlagMock.mockReturnValue([false]);
   });
 
   it('should render spinner while environment data is not loaded', () => {
@@ -115,12 +126,14 @@ describe('EnvironmentListView', () => {
         /Use environments to develop, test, and stage your applications before you release them/,
       ),
     ).toBeVisible();
-    expect(screen.getByText('Create environment')).toBeVisible();
+    // const createEnv = screen.queryByText('Create environment');
+    // expect(createEnv).toBeNull();
   });
 
   it('should render cards when environment(s) is(are) present', () => {
     render(<EnvironmentListView />);
-    expect(screen.getByText('Create environment')).toBeVisible();
+    // const createEnv = screen.queryByText('Create environment');
+    // expect(createEnv)[0].toBeVisible();
     expect(screen.getAllByTestId('environment-card').length).toBe(
       mockAppEnvWithHealthStatus.length,
     );

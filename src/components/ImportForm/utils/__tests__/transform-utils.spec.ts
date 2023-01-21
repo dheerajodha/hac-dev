@@ -1,5 +1,16 @@
 import { mockDetectedComponent } from '../__data__/mock-cdq';
-import { createResourceData, transformComponentValues } from '../transform-utils';
+import {
+  createResourceData,
+  sampleComponentValues,
+  transformComponentValues,
+} from '../transform-utils';
+
+const mockResourceRequests = {
+  requests: {
+    cpu: '2',
+    memory: '1Gi',
+  },
+};
 
 const mockResourceLimits = {
   limits: {
@@ -9,12 +20,32 @@ const mockResourceLimits = {
 };
 
 describe('Transform Utils', () => {
-  it('Should create resource data from resource limits', () => {
+  it('should create resource data from resource requests', () => {
+    const result = createResourceData(mockResourceRequests);
+    expect(result).toEqual({
+      cpu: '2',
+      cpuUnit: 'cores',
+      memory: '1',
+      memoryUnit: 'Gi',
+    });
+  });
+
+  it('should create resource data from resource limits', () => {
     const result = createResourceData(mockResourceLimits);
     expect(result).toEqual({
       cpu: '48',
       cpuUnit: 'millicores',
       memory: '516',
+      memoryUnit: 'Mi',
+    });
+  });
+
+  it('should create default resource data', () => {
+    const result = createResourceData({});
+    expect(result).toEqual({
+      cpu: '10',
+      cpuUnit: 'millicores',
+      memory: '50',
       memoryUnit: 'Mi',
     });
   });
@@ -32,7 +63,7 @@ describe('Transform Utils', () => {
               url: 'https://github.com/nodeshift-starters/devfile-sample.git',
             },
           },
-          resources: { cpu: '1', cpuUnit: 'cores', memory: '512', memoryUnit: 'Mi' },
+          resources: { cpu: '10', cpuUnit: 'millicores', memory: '50', memoryUnit: 'Mi' },
           replicas: 1,
           targetPort: 8080,
           route: undefined,
@@ -43,5 +74,23 @@ describe('Transform Utils', () => {
         projectType: 'nodejs',
       },
     ]);
+  });
+});
+
+describe('sampleComponentValues', () => {
+  it('should prefix application to sample name', () => {
+    const mockDetectedComponents = {
+      node: { componentStub: { componentName: 'node', application: 'my-app' } },
+    };
+    const values = sampleComponentValues('my-app', mockDetectedComponents);
+    expect(values[0].componentStub).toHaveProperty('componentName', 'my-app-node-sample');
+  });
+
+  it('should sanitize application prefix', () => {
+    const mockDetectedComponents = {
+      node: { componentStub: { componentName: 'node', application: 'My Application' } },
+    };
+    const values = sampleComponentValues('My Application', mockDetectedComponents);
+    expect(values[0].componentStub).toHaveProperty('componentName', 'my-application-node-sample');
   });
 });

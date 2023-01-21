@@ -10,6 +10,7 @@ import {
   TextContent,
   Text,
   HelperTextItem,
+  EmptyStateBody,
 } from '@patternfly/react-core';
 import { useFormikContext } from 'formik';
 import { CheckboxField } from '../../../shared';
@@ -25,8 +26,12 @@ const ComponentLoadingState: React.FC = () => {
       <EmptyState>
         <EmptyStateIcon variant="container" component={Spinner} />
         <Title size="lg" headingLevel="h4">
-          Detecting Components
+          Detecting
         </Title>
+        <EmptyStateBody>
+          We&apos;re scanning your GitHub repo to determine runtime and other default settings. This
+          might take some time.
+        </EmptyStateBody>
       </EmptyState>
     </Bullseye>
   );
@@ -34,19 +39,26 @@ const ComponentLoadingState: React.FC = () => {
 
 const ReviewSection: React.FunctionComponent = () => {
   const {
-    values: { source, secret, application, git, isDetected },
+    values: {
+      source: {
+        git: { url: sourceUrl, revision, context },
+      },
+      secret,
+      application,
+      isDetected,
+    },
     setFieldValue,
   } = useFormikContext<ImportFormValues>();
   const cachedComponents = React.useRef([]);
   const cachedComponentsLoaded = React.useRef(false);
-  const isContainerImage = containerImageRegex.test(source);
+  const isContainerImage = containerImageRegex.test(sourceUrl);
 
   const [detectedComponents, detectionLoaded] = useComponentDetection(
-    !isContainerImage ? source : null,
+    !isContainerImage ? sourceUrl : null,
     application,
     secret,
-    git.context,
-    git.ref,
+    context,
+    revision,
   );
 
   React.useEffect(() => {
@@ -58,14 +70,14 @@ const ReviewSection: React.FunctionComponent = () => {
     setFieldValue('isDetected', false);
 
     if (isContainerImage) {
-      const sourceItems = source.split('/');
+      const sourceItems = sourceUrl.split('/');
       const containerImageName = sourceItems[sourceItems.length - 1];
       const componentName = containerImageName.split(':').join('-');
       components = {
         [componentName]: {
           componentStub: {
             componentName,
-            containerImage: source,
+            containerImage: sourceUrl,
           },
         },
       };
@@ -92,7 +104,7 @@ const ReviewSection: React.FunctionComponent = () => {
           componentStub: {
             componentName: 'my-component',
             application,
-            source: { git: { url: source } },
+            source: { git: { url: sourceUrl } },
           },
         },
       });
@@ -105,7 +117,14 @@ const ReviewSection: React.FunctionComponent = () => {
     return () => {
       unmounted = true;
     };
-  }, [application, detectedComponents, detectionLoaded, isContainerImage, setFieldValue, source]);
+  }, [
+    application,
+    detectedComponents,
+    detectionLoaded,
+    isContainerImage,
+    setFieldValue,
+    sourceUrl,
+  ]);
 
   if (!cachedComponentsLoaded.current) {
     return <ComponentLoadingState />;

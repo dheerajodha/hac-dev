@@ -19,24 +19,34 @@ export const applicationValidationSchema = yup.object({
 
 const createSourceValidationSchema = (containerImageSupport: boolean) =>
   yup.object({
-    source: yup
-      .string()
-      .trim()
-      .max(2000, 'Please enter a URL that is less than 2000 characters.')
-      .matches(
-        containerImageSupport ? combineRegExps(gitUrlRegex, containerImageRegex) : gitUrlRegex,
-        'Invalid Source URL',
-      )
-      .required('Required'),
-    git: yup.object({
-      ref: yup.string(),
-      context: yup.string(),
+    source: yup.object({
+      git: yup.object({
+        url: yup
+          .string()
+          .trim()
+          .max(2000, 'Please enter a URL that is less than 2000 characters.')
+          .matches(
+            containerImageSupport ? combineRegExps(gitUrlRegex, containerImageRegex) : gitUrlRegex,
+            'Invalid Source URL',
+          )
+          .required('Required'),
+        revision: yup.string(),
+        context: yup.string(),
+      }),
     }),
     isValidated: yup.boolean().isTrue().required('Required'),
   });
 
 export const sourceValidationSchema = createSourceValidationSchema(true);
 export const gitSourceValidationSchema = createSourceValidationSchema(false);
+
+export const sampleValidationSchema = yup.object({
+  source: yup.object({
+    git: yup.object({
+      url: yup.string().required(),
+    }),
+  }),
+});
 
 export const reviewValidationSchema = yup.object({
   components: yup.array().of(

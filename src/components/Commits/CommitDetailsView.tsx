@@ -21,7 +21,7 @@ import { PipelineRunLabel } from '../../consts/pipelinerun';
 import { PipelineRunGroupVersionKind } from '../../models';
 import { pipelineRunFilterReducer } from '../../shared';
 import ExternalLink from '../../shared/components/links/ExternalLink';
-import { StatusIconWithText } from '../../shared/components/pipeline-run-logs/StatusIcon';
+import { StatusIconWithTextLabel } from '../../shared/components/pipeline-run-logs/StatusIcon';
 import { Timestamp } from '../../shared/components/timestamp/Timestamp';
 import { PipelineRunKind } from '../../types';
 import { createCommitObjectFromPLR, getCommitShortName, statuses } from '../../utils/commits-utils';
@@ -192,11 +192,11 @@ const CommitDetailsView: React.FC<CommitDetailsViewProps> = ({ commitName, appli
                   name: applicationName,
                 },
                 {
-                  path: `/stonesoup/applications/${applicationName}?activeTab=commits`,
+                  path: `/stonesoup/applications/${applicationName}/commits`,
                   name: 'commits',
                 },
                 {
-                  path: `/stonesoup/applications/${applicationName}/commit/${commitName}`,
+                  path: `/stonesoup/${applicationName}/commit/${commitName}`,
                   name: commitDisplayName,
                 },
               ]}
@@ -211,7 +211,7 @@ const CommitDetailsView: React.FC<CommitDetailsViewProps> = ({ commitName, appli
                     variant="plain"
                     onClick={onStatusClick}
                   >
-                    <StatusIconWithText status={commitStatus} />
+                    <StatusIconWithTextLabel status={commitStatus} />
                   </Button>
                 </Text>
               }
@@ -278,6 +278,7 @@ const CommitDetailsView: React.FC<CommitDetailsViewProps> = ({ commitName, appli
                   onClick: () => window.open(commit.shaURL),
                 },
               ]}
+              baseURL={`/stonesoup/${applicationName}/commit/${commitName}`}
               tabs={[
                 {
                   key: 'overview',

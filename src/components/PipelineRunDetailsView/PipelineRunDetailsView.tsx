@@ -5,7 +5,7 @@ import { Bullseye, Spinner } from '@patternfly/react-core';
 import { PipelineRunLabel } from '../../consts/pipelinerun';
 import { PipelineRunGroupVersionKind } from '../../models/pipelineruns';
 import { pipelineRunFilterReducer } from '../../shared';
-import { StatusIconWithText } from '../../shared/components/pipeline-run-logs/StatusIcon';
+import { StatusIconWithTextLabel } from '../../shared/components/pipeline-run-logs/StatusIcon';
 import { PipelineRunKind } from '../../types';
 import { useNamespace } from '../../utils/namespace-context-utils';
 import { pipelineRunCancel, pipelineRunRerun, pipelineRunStop } from '../../utils/pipeline-actions';
@@ -55,18 +55,18 @@ export const PipelineRunDetailsView: React.FC<PipelineRunDetailsViewProps> = ({
               name: applicationName,
             },
             {
-              path: `/stonesoup/applications/${applicationName}?activeTab=pipelineruns`,
+              path: `/stonesoup/applications/${applicationName}/pipelineruns`,
               name: 'Pipeline runs',
             },
             {
-              path: `/stonesoup/applications/${pipelineRunName}`,
+              path: `/stonesoup/pipelineruns/${pipelineRunName}`,
               name: pipelineRunName,
             },
           ]}
           title={
             <>
               <span className="pf-u-mr-sm">{pipelineRunName}</span>
-              <StatusIconWithText status={plrStatus} />
+              <StatusIconWithTextLabel status={plrStatus} />
             </>
           }
           actions={[
@@ -93,6 +93,7 @@ export const PipelineRunDetailsView: React.FC<PipelineRunDetailsViewProps> = ({
               onClick: () => pipelineRunCancel(pipelineRun),
             },
           ]}
+          baseURL={`/stonesoup/pipelineruns/${pipelineRunName}`}
           tabs={[
             {
               key: 'detail',

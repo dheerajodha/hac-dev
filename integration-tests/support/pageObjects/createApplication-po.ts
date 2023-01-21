@@ -58,7 +58,7 @@ export const applicationDetailPagePO = {
   componentBuildLog: '[data-testid="view-build-logs"]',
   componentSettings: '[data-testid="Component settings"]',
   detailsArrow: '[aria-label="Details"]',
-  cpuRamLabel: 'CPU/Mem Requests',
+  cpuRamLabel: 'CPU / Memory',
   replicaLabel: 'Instances',
   route: '[data-test-id="{0}-route"]',
 };

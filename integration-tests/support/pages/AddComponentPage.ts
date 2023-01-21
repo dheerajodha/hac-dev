@@ -8,7 +8,7 @@ export class AddComponentPage extends AbstractWizardPage {
     cy.contains('div', addComponentPagePO.notValidatedMessage, { timeout: timeoutDuration });
   }
   waitRepoValidated(timeoutDuration: number = 60000) {
-    cy.contains('div', 'Validated authentication', { timeout: timeoutDuration });
+    cy.contains('div', 'Access validated', { timeout: timeoutDuration });
   }
 
   openSamplesPage() {
@@ -34,7 +34,7 @@ export class AddComponentPage extends AbstractWizardPage {
   }
 
   clickNext() {
-    cy.get(addComponentPagePO.next).trigger('click');
+    cy.get(addComponentPagePO.next).click({ force: true });
   }
 
   clickCancel() {

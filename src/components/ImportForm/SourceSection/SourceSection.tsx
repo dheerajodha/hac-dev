@@ -35,7 +35,7 @@ export const SourceSection: React.FC<SourceSectionProps> = ({ onStrategyChange }
   const [showGitOptions, setShowGitOptions] = React.useState<boolean>(false);
 
   const [, { value: source, touched, error }] = useField<string>({
-    name: 'source',
+    name: 'source.git.url',
     type: 'input',
   });
   const {
@@ -48,7 +48,7 @@ export const SourceSection: React.FC<SourceSectionProps> = ({ onStrategyChange }
   const [helpText, setHelpText] = React.useState('');
   const [helpTextInvalid, setHelpTextInvalid] = React.useState('');
 
-  const fieldId = getFieldId('source', 'input');
+  const fieldId = getFieldId('source.git.url', 'input');
   const isValid = !(touched && error);
   const label = 'Git repo URL';
 
@@ -57,13 +57,13 @@ export const SourceSection: React.FC<SourceSectionProps> = ({ onStrategyChange }
 
   const setFormValidating = React.useCallback(() => {
     setValidated(ValidatedOptions.default);
-    setHelpText('Validating authentication...');
+    setHelpText('Checking access...');
     setFieldValue('isValidated', false);
   }, [setFieldValue]);
 
   const setFormValidated = React.useCallback(() => {
     setValidated(ValidatedOptions.success);
-    setHelpText('Validated authentication');
+    setHelpText('Access validated');
     setFieldValue('isValidated', true);
   }, [setFieldValue]);
 
@@ -137,7 +137,7 @@ export const SourceSection: React.FC<SourceSectionProps> = ({ onStrategyChange }
   });
 
   const handleStrategyChange = React.useCallback(() => {
-    setFieldValue('source', '');
+    setFieldValue('source.git.url', '');
     onStrategyChange(ImportStrategy.SAMPLE);
   }, [onStrategyChange, setFieldValue]);
 
@@ -159,7 +159,9 @@ export const SourceSection: React.FC<SourceSectionProps> = ({ onStrategyChange }
       {onStrategyChange && (
         <SamplesInfoAlert>
           <p>
-            Just be sure to fork the sample so that you<span>&apos;</span>re free to make changes.{' '}
+            If you select a sample, be sure to fork it to your own repository. That way, you can
+            edit the sample and choose to customize your pipeline and rebuilds whenever changes are
+            made.{' '}
             <Button variant={ButtonVariant.link} onClick={handleStrategyChange} isInline>
               Start with a sample.
             </Button>
@@ -176,7 +178,7 @@ export const SourceSection: React.FC<SourceSectionProps> = ({ onStrategyChange }
           <Grid hasGutter>
             <GridItem span={onStrategyChange ? 8 : 12}>
               <InputField
-                name="source"
+                name="source.git.url"
                 placeholder="Enter your source"
                 onChange={debouncedHandleSourceChange}
                 validated={validated}

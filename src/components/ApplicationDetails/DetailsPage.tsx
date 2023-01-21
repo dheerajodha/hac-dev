@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import {
   Dropdown,
   DropdownItem,
@@ -23,15 +23,16 @@ import BreadCrumbs from '../../shared/components/breadcrumbs/BreadCrumbs';
 
 import './DetailsPage.scss';
 
-type Action = { type?: string; key: string; label: React.ReactNode } & Omit<
-  DropdownItemProps,
-  'label'
->;
+type Action = {
+  type?: string;
+  key: string;
+  label: React.ReactNode;
+  hidden?: boolean;
+} & Omit<DropdownItemProps, 'label'>;
 type DetailsPageTabProps = {
   key: string;
   label: string;
   component: React.ReactNode;
-  href?: string;
   isDisabled?: true;
   className?: string;
   isFilled?: boolean;
@@ -46,6 +47,7 @@ type DetailsPageProps = {
   breadcrumbItems?: React.ReactNode;
   actions?: Action[];
   tabs: DetailsPageTabProps[];
+  baseURL: string;
   onTabSelect?: (selectedTabKey: string) => void;
 };
 
@@ -57,51 +59,50 @@ const DetailsPage: React.FC<DetailsPageProps> = ({
   breadcrumbItems,
   actions = [],
   tabs = [],
+  baseURL,
   onTabSelect,
 }) => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('activeTab');
-  const tabMatched = tabs?.find((t) => t.key === activeTab)?.key || tabs?.[0]?.key;
   const [isOpen, setIsOpen] = React.useState(false);
+  const params = useParams();
+  const { activeTab: tab } = params;
 
+  const activeTab = React.useMemo(() => tab || tabs?.[0]?.key, [tab, tabs]);
+  const navigate = useNavigate();
   const setActiveTab = React.useCallback(
-    (tab: string, replace = false) => {
-      if (activeTab !== tab) {
-        const params = new URLSearchParams();
-        params.set('activeTab', tab);
-        setSearchParams(params, { replace });
+    (newTab: string) => {
+      if (activeTab !== newTab) {
+        navigate(`${baseURL}/${newTab}`);
       }
     },
-    [setSearchParams, activeTab],
+    [activeTab, baseURL, navigate],
   );
-
-  React.useEffect(() => {
-    if (!tabMatched) {
-      setSearchParams(new URLSearchParams(), { replace: true });
-    } else {
-      setActiveTab(tabMatched, true);
-    }
-    // Only run once
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const dropdownItems = React.useMemo(
     () =>
-      actions?.map((action) => {
+      actions?.reduce((acc, action) => {
         const { type, key, label, ...props } = action;
-        if (type === 'separator') return <DropdownSeparator key={key} />;
-        if (type === 'section-label')
-          return (
+        if (action.hidden) {
+          return acc;
+        }
+        if (type === 'separator') {
+          acc.push(<DropdownSeparator key={key} />);
+          return acc;
+        }
+        if (type === 'section-label') {
+          acc.push(
             <DropdownItem key={key} data-test={key} {...props} isDisabled>
               <span className="pf-u-color-400 pf-u-font-size-sm">{label}</span>
-            </DropdownItem>
+            </DropdownItem>,
           );
-        return (
+          return acc;
+        }
+        acc.push(
           <DropdownItem key={key} data-test={key} {...props}>
             {label}
-          </DropdownItem>
+          </DropdownItem>,
         );
-      }),
+        return acc;
+      }, [] as React.ReactNode[]),
     [actions],
   );
 

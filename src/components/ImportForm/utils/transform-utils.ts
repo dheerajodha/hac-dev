@@ -1,14 +1,15 @@
+import { sanitizeName } from '../../../utils/create-utils';
 import { ResourceRequirements, DetectedComponents } from './../../../types';
-import { FormResources } from './types';
+import { CPUUnits, DetectedFormComponent, FormResources, MemoryUnits } from './types';
 
-const getResourceData = (res: string) => {
+const getResourceData = (res?: string) => {
   const resourcesRegEx = /^[0-9]*|[a-zA-Z]*/g;
-  return res.match(resourcesRegEx);
+  return res ? res.match(resourcesRegEx) : [];
 };
 
 const CPUResourceMap = {
-  m: 'millicores',
-  '': 'cores',
+  m: CPUUnits.millicores,
+  '': CPUUnits.cores,
 };
 
 type ResourceData = {
@@ -16,17 +17,17 @@ type ResourceData = {
   requests?: { cpu?: string; memory?: string };
 };
 
-export const createResourceData = (resources: ResourceData) => {
-  const memory = (resources?.requests?.memory || resources?.limits?.memory) ?? '512Mi';
-  const cpu = (resources?.requests?.cpu || resources?.limits?.cpu) ?? '1';
+export const createResourceData = (resources: ResourceData): FormResources => {
+  const memory = resources?.requests?.memory || resources?.limits?.memory;
+  const cpu = resources?.requests?.cpu || resources?.limits?.cpu;
   const [memoryResource, memoryUnit] = getResourceData(memory);
   const [cpuResource, cpuUnit] = getResourceData(cpu);
 
   return {
-    cpu: cpuResource || '',
-    cpuUnit: CPUResourceMap[cpuUnit] || CPUResourceMap[''],
-    memory: memoryResource || '',
-    memoryUnit: memoryUnit || 'Gi',
+    cpu: cpuResource || '10',
+    cpuUnit: CPUResourceMap[cpuUnit] || CPUUnits.millicores,
+    memory: memoryResource || '50',
+    memoryUnit: MemoryUnits[memoryUnit] || MemoryUnits.Mi,
   };
 };
 
@@ -41,7 +42,9 @@ export const transformResources = (formResources: FormResources): ResourceRequir
   };
 };
 
-export const transformComponentValues = (detectedComponents: DetectedComponents) => {
+export const transformComponentValues = (
+  detectedComponents: DetectedComponents,
+): DetectedFormComponent[] => {
   return Object.values(detectedComponents).map((detectedComponent) => {
     const component = detectedComponent.componentStub;
     return {
@@ -54,4 +57,17 @@ export const transformComponentValues = (detectedComponents: DetectedComponents)
       },
     };
   }, []);
+};
+
+export const sampleComponentValues = (
+  application: string,
+  detectedComponents: DetectedComponents,
+): DetectedFormComponent[] => {
+  return transformComponentValues(detectedComponents).map((component) => ({
+    ...component,
+    componentStub: {
+      ...component.componentStub,
+      componentName: `${sanitizeName(application)}-${component.componentStub.componentName}-sample`,
+    },
+  }));
 };

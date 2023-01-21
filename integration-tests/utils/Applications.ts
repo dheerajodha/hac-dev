@@ -1,22 +1,22 @@
 import { NavItem, pageTitles } from '../support/constants/PageTitle';
-import { actions, breadcrumb } from '../support/pageObjects/global-po';
-import { CreateApplicationPage } from '../support/pages/CreateApplicationPage';
-import { Common } from './Common';
 import { applicationDetailPagePO } from '../support/pageObjects/createApplication-po';
+import { actions, breadcrumb } from '../support/pageObjects/global-po';
 import {
   actionsDropdown,
   componentsTabPO,
   pipelinerunsTabPO,
   integrationTestsTabPO,
-  overviewTabPO
+  overviewTabPO,
 } from '../support/pageObjects/pages-po';
-import { OverviewTabPage } from '../support/pages/tabs/OverviewTabPage';
-import { ComponentsTabPage } from '../support/pages/tabs/ComponentsTabPage';
 import { AddComponentPage } from '../support/pages/AddComponentPage';
-import { ComponentPage } from '../support/pages/ComponentsPage';
-import { CreateBuildPage } from '../support/pages/CreateBuildPage';
 import { AddIntegrationTestPage } from '../support/pages/AddIntegrationTestPage';
-import { DetailsTab, PipelinerunsTabPage, TaskRunsTab } from '../support/pages/tabs/PipelinerunsTabPage';
+import { ComponentPage } from '../support/pages/ComponentsPage';
+import { CreateApplicationPage } from '../support/pages/CreateApplicationPage';
+import { CreateBuildPage } from '../support/pages/CreateBuildPage';
+import { ComponentsTabPage } from '../support/pages/tabs/ComponentsTabPage';
+import { OverviewTabPage } from '../support/pages/tabs/OverviewTabPage';
+import { PipelinerunsTabPage } from '../support/pages/tabs/PipelinerunsTabPage';
+import { Common } from './Common';
 
 export class Applications {
   static deleteApplication(applicationName: string) {
@@ -37,6 +37,7 @@ export class Applications {
     createApplicationPage.clickCreateApplication();
     cy.testA11y(`${pageTitles.createApp} page`);
     createApplicationPage.setApplicationName(name);
+    createApplicationPage.clickNext();
     createApplicationPage.clickNext();
     cy.testA11y(`Select source form`);
   }
@@ -118,12 +119,12 @@ function reviewComponentsStep(componentName: string, publicGitRepo: string, send
   const componentPage = new ComponentPage();
 
   // Edit component name
-  componentPage.editComponentName(componentName + "-temp");
-  cy.contains('div', componentName + "-temp").should('be.visible');
+  componentPage.editComponentName(`${componentName}-temp`);
+  cy.contains('div', `${componentName}-temp`).should('be.visible');
 
   // Switch back to orginal name
   componentPage.editComponentName(componentName);
-  cy.contains('div', componentName).should('be.visible');;
+  cy.contains('div', componentName).should('be.visible');
 
   if (sendPR) {
     componentPage.sendPullRequest();
@@ -135,16 +136,14 @@ function reviewComponentsStep(componentName: string, publicGitRepo: string, send
   (sendPR)? componentPage.triggerBuilds(componentName, publicGitRepo): "";
 }
 
-
 function createBuildStep() {
   new CreateBuildPage().clickNext();
 }
 
-
 export function addIntegrationTestStep(displayName: string, optionalForRelease: boolean = false) {
   const addIntegrationTestPage = new AddIntegrationTestPage();
-  const containerImage = 'quay.io/kpavic/test-bundle:pipeline'
-  const pipelineName = 'demo-pipeline'
+  const containerImage = 'quay.io/kpavic/test-bundle:pipeline';
+  const pipelineName = 'demo-pipeline';
 
   addIntegrationTestPage.enterDisplayName(displayName);
   addIntegrationTestPage.enterContainerImage(containerImage);
@@ -154,7 +153,9 @@ export function addIntegrationTestStep(displayName: string, optionalForRelease: 
     addIntegrationTestPage.markOptionalForRelease();
   }
 
-  cy.get('body').then(body => {
-    (body.find('button[type="submit"]').length > 0)? addIntegrationTestPage.clickNext() : addIntegrationTestPage.clickAdd();
+  cy.get('body').then((body) => {
+    body.find('button[type="submit"]').length > 0
+      ? addIntegrationTestPage.clickNext()
+      : addIntegrationTestPage.clickAdd();
   });
 }
